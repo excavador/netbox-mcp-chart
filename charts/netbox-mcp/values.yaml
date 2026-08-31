@@ -1,0 +1,75 @@
+# netbox-mcp-server packaged for Kubernetes.
+#
+# Upstream is read-only by design and exposes no plugin surface, so the
+# blast radius of the MCP endpoint is "everything the NetBox token can
+# read" and nothing more. Choose that token accordingly.
+
+image:
+  registry: docker.io
+  repository: netboxlabs/netbox-mcp-server
+  # Pinned explicitly rather than resolved from .Chart.AppVersion. This
+  # chart packages someone else's image, so a release of THIS chart must
+  # never change which upstream tag runs. Renovate moves this line;
+  # appVersion in Chart.yaml moves with it.
+  tag: "1.2.1"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+## NetBox connection.
+netbox:
+  # In-cluster service URL, e.g. http://netbox.netbox.svc
+  url: ""
+  # Secret holding the NetBox API token. REQUIRED: the token is never
+  # taken as a literal, so it cannot end up in a values file or in git.
+  existingSecret: ""
+  existingSecretTokenKey: token
+  # Upstream defaults this to true. Left true: an in-cluster http:// URL
+  # does not need it off, and turning it off to paper over a cert problem
+  # is how TLS verification quietly dies everywhere.
+  verifySsl: true
+  # Auto-discovery of plugin object types. Off upstream, off here: it
+  # widens what the server will happily enumerate.
+  enablePluginDiscovery: false
+
+## HTTP transport. stdio cannot work in a container, so this is fixed.
+service:
+  type: ClusterIP
+  port: 8000
+
+## OPTIONAL static bearer token checked by the server itself.
+##
+## This is NOT the primary access control when the endpoint is exposed
+## through a gateway that validates OIDC JWTs -- there it is defence in
+## depth for anything that reaches the Service directly, bypassing the
+## gateway. Leave empty to rely solely on the gateway.
+mcpAuth:
+  existingSecret: ""
+  existingSecretTokenKey: mcp-auth-token
+
+logLevel: INFO
+
+resources:
+  requests: {cpu: 50m, memory: 128Mi}
+  # No CPU limit: CFS quota throttles bursty request handling even when
+  # average usage is far below the limit. Memory is capped so a runaway
+  # dies rather than pressuring the node.
+  limits: {memory: 512Mi}
+
+# Restricted-PSA clean out of the box.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  seccompProfile: {type: RuntimeDefault}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: {drop: ["ALL"]}
+
+podAnnotations: {}
+annotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

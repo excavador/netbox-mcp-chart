@@ -1,0 +1,96 @@
+{{- if not .Values.netbox.url }}
+{{- fail "netbox.url is required" }}
+{{- end }}
+{{- if not .Values.netbox.existingSecret }}
+{{- fail "netbox.existingSecret is required: the API token is never accepted as a literal" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "netbox-mcp.fullname" . }}
+  labels: {{- include "netbox-mcp.labels" . | nindent 4 }}
+  {{- with .Values.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: {{- include "netbox-mcp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "netbox-mcp.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: netbox-mcp
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+            - name: NETBOX_URL
+              value: {{ .Values.netbox.url | quote }}
+            - name: NETBOX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.netbox.existingSecret }}
+                  key: {{ .Values.netbox.existingSecretTokenKey }}
+            # stdio cannot work in a container; upstream says so outright.
+            - name: TRANSPORT
+              value: "http"
+            # Upstream defaults to 127.0.0.1, which in a pod means nothing
+            # can reach it -- not even a readiness probe.
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+            - name: VERIFY_SSL
+              value: {{ .Values.netbox.verifySsl | quote }}
+            - name: ENABLE_PLUGIN_DISCOVERY
+              value: {{ .Values.netbox.enablePluginDiscovery | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+            {{- if .Values.mcpAuth.existingSecret }}
+            - name: MCP_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mcpAuth.existingSecret }}
+                  key: {{ .Values.mcpAuth.existingSecretTokenKey }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          # TCP probes, deliberately. The MCP endpoint at /mcp answers 401
+          # once MCP_AUTH_TOKEN is set, and a probe that trips on its own
+          # auth would crash-loop a perfectly healthy server.
+          startupProbe:
+            tcpSocket: {port: http}
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket: {port: http}
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: {port: http}
+            periodSeconds: 20
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            # readOnlyRootFilesystem is on, so anything that wants to write
+            # needs somewhere to go.
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}

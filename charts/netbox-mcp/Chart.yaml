@@ -1,0 +1,22 @@
+apiVersion: v2
+name: netbox-mcp
+type: application
+description: NetBox MCP server — read-only Model Context Protocol access to a NetBox instance.
+# Chart version is INDEPENDENT semver — it moves for chart changes, while
+# appVersion tracks the upstream netbox-mcp-server release. Keep them
+# decoupled: publishing a chart fix must never imply an app version it
+# does not correspond to. helmctl injects the git tag as the
+# authoritative version at release time.
+version: 0.1.0
+appVersion: "1.2.1"
+home: https://github.com/netboxlabs/netbox-mcp-server
+sources:
+  - https://github.com/netboxlabs/netbox-mcp-server
+  - https://github.com/opwerm/netbox-mcp-chart
+maintainers:
+  - name: Oleg Tsarev
+    email: oleg@tsarev.id
+keywords:
+  - netbox
+  - mcp
+  - model-context-protocol
