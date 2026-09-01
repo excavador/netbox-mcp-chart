@@ -29,7 +29,7 @@ jobs:
     # GITHUB_TOKEN, which is why calling it from a different org works.
     uses: truvity/ci-workflows/.github/workflows/release-public.yaml@49248a6cebd3720ac7f2eaf2e98ec97c0967b3b6 # v2.17.0
     with:
-      charts: '["netbox-mcp"]'
+      charts: '["netbox-mcp-upstream"]'
       chart-registry: oci://ghcr.io/opwerm/charts
       # This chart packages someone else's application, so the release
       # version says nothing about the image. Left on the default the

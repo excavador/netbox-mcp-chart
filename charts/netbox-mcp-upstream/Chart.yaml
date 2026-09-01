@@ -1,7 +1,7 @@
 apiVersion: v2
-name: netbox-mcp
+name: netbox-mcp-upstream
 type: application
-description: NetBox MCP server — read-only Model Context Protocol access to a NetBox instance.
+description: NetBox MCP server (netboxlabs/netbox-mcp-server) -- read-only Model Context Protocol access to a NetBox instance.
 # Chart version is INDEPENDENT semver — it moves for chart changes, while
 # appVersion tracks the upstream netbox-mcp-server release. Keep them
 # decoupled: publishing a chart fix must never imply an app version it

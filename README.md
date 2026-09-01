@@ -1,11 +1,20 @@
 # netbox-mcp-chart
 
 Helm chart for [netbox-mcp-server](https://github.com/netboxlabs/netbox-mcp-server) —
-read-only [Model Context Protocol](https://modelcontextprotocol.io) access to a
-NetBox instance.
+NetBox Labs' read-only Model Context Protocol server.
+
+> **Published as `oci://ghcr.io/opwerm/charts/netbox-mcp-upstream`.**
+>
+> It used to be `charts/netbox-mcp`. That path now belongs to
+> [opwerm/netbox-mcp](https://github.com/opwerm/netbox-mcp), our own Go server,
+> which writes as well as reads. This chart packages the upstream read-only
+> server and is kept as a fallback.
+>
+> Charts already published under the old path stay pullable; nothing was
+> deleted. New releases from this repo go to the `-upstream` path.
 
 ```
-oci://ghcr.io/opwerm/charts/netbox-mcp
+oci://ghcr.io/opwerm/charts/netbox-mcp-upstream
 ```
 
 This packages the upstream image; it does not build one. Upstream publishes

@@ -22,4 +22,4 @@ changelog:
 release:
   prerelease: auto
   footer: |
-    Helm chart: `oci://ghcr.io/opwerm/charts/netbox-mcp:{{ .Version }}`
+    Helm chart: `oci://ghcr.io/opwerm/charts/netbox-mcp-upstream:{{ .Version }}`
