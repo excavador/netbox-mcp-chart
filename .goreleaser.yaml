@@ -1,7 +1,7 @@
 # Chart-only repository: there is no Go binary and no container image to
 # build here — the image belongs to upstream netbox-mcp-server.
 # goreleaser's job is the GitHub release and its changelog; chart
-# packaging and the push to ghcr.io/opwerm/charts happen in the release
+# packaging and the push to ghcr.io/excavador/charts happen in the release
 # workflow.
 version: 2
 
@@ -22,4 +22,4 @@ changelog:
 release:
   prerelease: auto
   footer: |
-    Helm chart: `oci://ghcr.io/opwerm/charts/netbox-mcp-upstream:{{ .Version }}`
+    Helm chart: `oci://ghcr.io/excavador/charts/netbox-mcp-upstream:{{ .Version }}`

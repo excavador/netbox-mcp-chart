@@ -12,7 +12,7 @@ appVersion: "1.2.1"
 home: https://github.com/netboxlabs/netbox-mcp-server
 sources:
   - https://github.com/netboxlabs/netbox-mcp-server
-  - https://github.com/opwerm/netbox-mcp-chart
+  - https://github.com/excavador/netbox-mcp-chart
 maintainers:
   - name: Oleg Tsarev
     email: oleg@tsarev.id
